@@ -1,0 +1,245 @@
+body, html { height:100%; }
+#wrapper { min-height:100vh; display:flex; }
+#sidebar { width:220px; min-height:100vh; }
+#page-content { overflow:auto; }
+.btn-toggle { width:100%; text-align:left; border:none; background:transparent; padding:10px 20px; color:#333; }
+.btn-toggle:hover { background:#f6f6f6; }
+.card { border-radius:8px; }
+:root{
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --muted: #6c757d;
+  --text: #212529;
+  --border: #e9ecef;
+  --accent: #0d6efd;
+}
+
+body.dark-mode {
+  --bg: #0f1720;
+  --card: #0b1220;
+  --muted: #9aa4b2;
+  --text: #e6eef6;
+  --border: #1f2a36;
+  --accent: #4ea8ff;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* Apply variables across main elements and override Bootstrap where needed */
+body.dark-mode,
+body.dark-mode .container-fluid,
+body.dark-mode .card,
+body.dark-mode #page-content,
+body.dark-mode main,
+body.dark-mode .table,
+body.dark-mode .table thead,
+body.dark-mode .table tbody tr,
+body.dark-mode .table.table-hover tbody tr:hover {
+  color: var(--text) !important;
+}
+
+/* Sidebar */
+body.dark-mode #sidebar {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border-right: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+/* Navbar / Header */
+body.dark-mode .navbar,
+body.dark-mode nav.navbar {
+  background-color: rgba(11,18,32,0.9) !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+/* Sidebar buttons and active state */
+body.dark-mode .btn-toggle {
+  color: var(--text) !important;
+  background: transparent !important;
+  border: none !important;
+}
+body.dark-mode .btn-toggle:hover {
+  background-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Make the sidebar header text visible */
+body.dark-mode .sidebar-header,
+body.dark-mode .sidebar-header h6 {
+  color: var(--text) !important;
+}
+
+/* Cards */
+body.dark-mode .card {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Inputs/selects */
+body.dark-mode input.form-control,
+body.dark-mode select.form-select,
+body.dark-mode .form-control,
+body.dark-mode textarea {
+  background-color: rgba(255,255,255,0.02) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Table header background */
+body.dark-mode .table-light thead {
+  background-color: rgba(255,255,255,0.03) !important;
+  color: var(--text) !important;
+}
+
+/* Badges */
+body.dark-mode .badge {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: var(--text) !important;
+}
+body.dark-mode .bg-danger { background-color: #c94a4a !important; color: #fff !important; }
+body.dark-mode .bg-warning { background-color: #d3a84a !important; color: #111 !important; }
+body.dark-mode .bg-success { background-color: #3fa46a !important; color: #fff !important; }
+
+/* Buttons */
+body.dark-mode .btn-outline-secondary {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+body.dark-mode .btn-primary {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+/* Chart canvas background protection */
+body.dark-mode canvas {
+  background-color: transparent !important;
+}
+
+/* Small responsiveness tweak */
+@media (max-width: 768px) {
+  body.dark-mode #sidebar { background-color: var(--card) !important; }
+}
+
+
+
+/* ---------- Dark-mode: sidebar & navbar link colors ---------- */
+body.dark-mode {
+  --link: #cfe9ff;       /* normal sidebar link color */
+  --link-hover: #ffffff; /* hover color */
+  --link-active: var(--accent); /* active page color */
+}
+
+/* Sidebar link (text + icon) */
+body.dark-mode #sidebar .btn-toggle,
+body.dark-mode #sidebar .btn-toggle .fa {
+  color: var(--link) !important;
+  opacity: 0.95;
+}
+
+/* Hover */
+body.dark-mode #sidebar .btn-toggle:hover,
+body.dark-mode #sidebar .btn-toggle:focus {
+  color: var(--link-hover) !important;
+  background-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Active / current page */
+body.dark-mode #sidebar .btn-toggle.active,
+body.dark-mode #sidebar .btn-toggle.active:hover,
+body.dark-mode #sidebar .btn-toggle[aria-current="page"] {
+  color: var(--link-active) !important;
+  background-color: rgba(78,168,255,0.10) !important;
+  border-left: 3px solid var(--link-active) !important;
+  padding-left: calc(20px - 3px) !important; /* keep spacing after border */
+}
+
+/* If you use <a class="active"> on anchor tags inside sidebar */
+body.dark-mode #sidebar a.active {
+  color: var(--link-active) !important;
+}
+
+/* Top navbar page title (if you want it to change too) */
+body.dark-mode .navbar .navbar-brand,
+body.dark-mode .navbar .navbar-text {
+  color: var(--link-hover) !important;
+}
+
+
+
+/* ---------- Global Dark-Mode Text Contrast Fix ---------- */
+
+body.dark-mode {
+  --text-main: #e6eef6;   /* primary text */
+  --text-muted: #b8c5d6;  /* readable muted text */
+  --text-soft: #9aa4b2;   /* softer but still visible */
+}
+
+/* Muted text readability (Bootstrap overrides) */
+body.dark-mode .text-muted,
+body.dark-mode small,
+body.dark-mode .card small,
+body.dark-mode .sidebar-header small,
+body.dark-mode .navbar small,
+body.dark-mode footer small,
+body.dark-mode .form-text,
+body.dark-mode .table-sm small,
+body.dark-mode .table thead small,
+body.dark-mode .badge small,
+body.dark-mode label.form-label {
+  color: var(--text-muted) !important;
+}
+
+/* Secondary / additional light text areas */
+body.dark-mode .subtext,
+body.dark-mode .description,
+body.dark-mode p.text-muted,
+body.dark-mode td.text-muted,
+body.dark-mode .sidebar-desc {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure table headers & labels are readable */
+body.dark-mode .table-light th,
+body.dark-mode .table thead th {
+  color: var(--text-main) !important;
+}
+
+/* Input hint text */
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: var(--text-soft) !important;
+}
+
+
+
+
+
+/* Sidebar toggle behavior */
+#sidebar {
+  width: 220px;
+  transition: all 0.3s ease;
+}
+
+#sidebar.collapsed {
+  margin-left: -220px;
+}
+
+/* Page content shifts when sidebar closes */
+#page-content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+}
+
+#page-content.expanded {
+  margin-left: 0;
+}
+
+
+
+
+body.dark-mode #sidebar.collapsed {
+  margin-left: -220px !important;
+}

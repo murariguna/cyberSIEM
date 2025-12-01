@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CyberSIEM — Hosts</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+  <div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-white border-end">
+      <div class="sidebar-header text-center py-4">
+        <img src="assets/logo.png" alt="logo" style="width:48px">
+        <h6 class="mt-2">CyberSIEM</h6>
+      </div>
+      <ul class="list-unstyled ps-0">
+        <li class="mb-1"><a href="index.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-home me-2"></i> Overview</a></li>
+        <li class="mb-1"><a href="hosts.html" class="btn btn-toggle align-items-center rounded active"> <i class="fa fa-server me-2"></i> Hosts</a></li>
+        <li class="mb-1"><a href="alerts.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-bell me-2"></i> Alerts</a></li>
+        <li class="mb-1"><a href="settings.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-cog me-2"></i> Settings</a></li>
+      </ul>
+    </nav>
+
+    <!-- Page content -->
+    <div id="page-content" class="flex-fill">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid d-flex align-items-center">
+  <button class="btn btn-outline-secondary me-3" id="sidebarToggle">
+    <i class="fa fa-bars"></i>
+  </button>
+  <span class="navbar-brand">Hosts
+
+  </span>
+
+          <div class="d-flex">
+            <div class="me-3">Signed in as <strong>You</strong></div>
+            <button class="btn btn-outline-secondary btn-sm"><a href="settings.html" style="text-decoration: none;color: inherit">Profile</a></button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="container-fluid p-4">
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <div class="card shadow-sm p-3">
+              <h6 class="mb-0">Hosts Overview</h6>
+              <small class="text-muted">Click a host for details</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3" id="hostsGrid">
+          <!-- host cards injected here -->
+        </div>
+
+        <div class="card mt-4 shadow-sm" id="hostDetailCard" style="display:none;">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <h6 id="detailHostTitle">Host Details</h6>
+              <button class="btn btn-sm btn-outline-secondary" id="closeDetail">Close</button>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <p><strong>IP:</strong> <span id="detailIP"></span></p>
+                <p><strong>OS:</strong> <span id="detailOS"></span></p>
+                <p><strong>Last Seen:</strong> <span id="detailLast"></span></p>
+                <p><strong>Active Alerts:</strong> <span id="detailAlerts"></span></p>
+              </div>
+              <div class="col-md-6">
+                <h6>Recent Events</h6>
+                <ul id="detailEvents" class="list-group list-group-flush"></ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- JS libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Optional common mock-data if you have it -->
+  <script src="js/mock-data.js"></script>
+
+  <script>
+  // Fallback hosts if MOCK_HOSTS not defined
+  const FALLBACK_HOSTS = [
+    {id:"host1", ip:"10.0.0.5", os:"Ubuntu 22.04", last_seen:"2025-12-01 12:30", alerts:2, events:[
+      "Failed SSH login from 10.0.0.9",
+      "New process: curl",
+      "Suricata alert: ET SCAN"
+    ]},
+    {id:"host2", ip:"10.0.0.6", os:"Windows 10", last_seen:"2025-12-01 12:10", alerts:1, events:[
+      "Sysmon: new process powershell.exe",
+      "Failed login attempt"
+    ]},
+    {id:"host3", ip:"10.0.0.7", os:"Ubuntu 20.04", last_seen:"2025-12-01 11:45", alerts:0, events:[
+      "Normal heartbeat"
+    ]}
+  ];
+
+  const HOSTS = (typeof MOCK_HOSTS !== 'undefined') ? MOCK_HOSTS : FALLBACK_HOSTS;
+
+  function renderHosts(){
+    const grid = document.getElementById('hostsGrid');
+    grid.innerHTML = '';
+    HOSTS.forEach(h=>{
+      const col = document.createElement('div');
+      col.className = 'col-md-4';
+      col.innerHTML = `
+        <div class="card shadow-sm h-100 host-card" data-host="${h.id}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h6 class="mb-1">${h.id}</h6>
+                <small class="text-muted">${h.os}</small>
+              </div>
+              <div class="text-end">
+                <div><strong>${h.alerts}</strong> Alerts</div>
+                <small class="text-muted">Last: ${h.last_seen}</small>
+              </div>
+            </div>
+            <hr>
+            <p class="mb-0 text-truncate">${(h.events && h.events[0]) || ''}</p>
+            <div class="mt-2 d-flex justify-content-end">
+              <button class="btn btn-sm btn-outline-primary view-host">View</button>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(col);
+
+      col.querySelector('.view-host').addEventListener('click', ()=>{
+        showHostDetail(h);
+      });
+    });
+  }
+
+  function showHostDetail(h){
+    document.getElementById('hostDetailCard').style.display = 'block';
+    document.getElementById('detailHostTitle').innerText = `Host: ${h.id}`;
+    document.getElementById('detailIP').innerText = h.ip;
+    document.getElementById('detailOS').innerText = h.os;
+    document.getElementById('detailLast').innerText = h.last_seen;
+    document.getElementById('detailAlerts').innerText = h.alerts;
+    const ul = document.getElementById('detailEvents');
+    ul.innerHTML = '';
+    (h.events || []).forEach(ev=>{
+      const li = document.createElement('li');
+      li.className = 'list-group-item';
+      li.innerText = ev;
+      ul.appendChild(li);
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    renderHosts();
+    document.getElementById('closeDetail').addEventListener('click', ()=>{
+      document.getElementById('hostDetailCard').style.display = 'none';
+    });
+  });
+  </script>
+  <script src="js/theme-loader.js"></script>
+  <script src="js/toggle.js"></script>
+
+</body>
+</html>
+

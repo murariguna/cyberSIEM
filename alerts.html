@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CyberSIEM — Alerts</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+  <div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-white border-end">
+      <div class="sidebar-header text-center py-4">
+        <img src="assets/logo.png" alt="logo" style="width:48px">
+        <h6 class="mt-2">CyberSIEM</h6>
+      </div>
+      <ul class="list-unstyled ps-0">
+        <li class="mb-1"><a href="index.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-home me-2"></i> Overview</a></li>
+        <li class="mb-1"><a href="hosts.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-server me-2"></i> Hosts</a></li>
+        <li class="mb-1"><a href="alerts.html" class="btn btn-toggle align-items-center rounded active"> <i class="fa fa-bell me-2"></i> Alerts</a></li>
+        <li class="mb-1"><a href="settings.html" class="btn btn-toggle align-items-center rounded"> <i class="fa fa-cog me-2"></i> Settings</a></li>
+      </ul>
+    </nav>
+
+    <!-- Page content -->
+    <div id="page-content" class="flex-fill">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid d-flex align-items-center">
+  <button class="btn btn-outline-secondary me-3" id="sidebarToggle">
+    <i class="fa fa-bars"></i>
+  </button>
+  <span class="navbar-brand">Alerts</span>
+
+          <div class="d-flex">
+            <div class="me-3">Signed in as <strong>You</strong></div>
+            <button class="btn btn-outline-secondary btn-sm"><a href="settings.html" style="text-decoration: none;color: inherit">Profile</a></button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="container-fluid p-4">
+        <div class="row g-3 mb-3">
+          <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+              <h6 class="mb-1">Active Alerts</h6>
+              <h3 id="alerts-count">—</h3>
+              <small class="text-muted">Pending investigation</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+              <h6 class="mb-1">High Risk</h6>
+              <h3 id="alerts-high">—</h3>
+              <small class="text-muted">Score > 70</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+              <h6 class="mb-1">Medium Risk</h6>
+              <h3 id="alerts-med">—</h3>
+              <small class="text-muted">Score 40–70</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+              <h6 class="mb-1">Low Risk</h6>
+              <h3 id="alerts-low">—</h3>
+              <small class="text-muted">Score < 40</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="card p-3 shadow-sm">
+              <h6>Alerts Timeline</h6>
+              <canvas id="alertsTimeline" height="120"></canvas>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+              <h6>Severity Distribution</h6>
+              <canvas id="severityDonut" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <h6 class="mb-0">Alerts</h6>
+              <div>
+                <input id="searchAlert" class="form-control form-control-sm" placeholder="Search alert, host or MITRE" style="width:260px">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover table-sm" id="alertsTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>Time</th><th>Host</th><th>Event</th><th>Risk</th><th>MITRE</th><th>Details</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- JS libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Optional common mock-data if you have it -->
+  <script src="js/mock-data.js"></script>
+
+  <script>
+  // Fallback sample alerts if MOCK_ALERTS not defined
+  const FALLBACK_ALERTS = [
+    {time:"2025-12-01 12:20:01", host:"host1", event:"SSH brute-force detected", risk:85, mitre:"T1110", details:"Multiple failed auths from 10.0.0.5"},
+    {time:"2025-12-01 11:59:46", host:"host2", event:"Port scan", risk:60, mitre:"T1595", details:"Nmap SYN scan from 10.0.0.9"},
+    {time:"2025-12-01 11:40:10", host:"host3", event:"Suspicious process", risk:45, mitre:"T1059", details:"curl executed, downloaded script"},
+    {time:"2025-12-01 10:05:00", host:"host1", event:"Suricata signature match", risk:90, mitre:"T1203", details:"ET MALWARE Possible Trojan"}
+  ];
+
+  const ALERTS = (typeof MOCK_ALERTS !== 'undefined') ? MOCK_ALERTS : FALLBACK_ALERTS;
+
+  // Populate summary cards
+  function populateSummary(){
+    const total = ALERTS.length;
+    const high = ALERTS.filter(a=>a.risk>=70).length;
+    const med = ALERTS.filter(a=>a.risk>=40 && a.risk<70).length;
+    const low = ALERTS.filter(a=>a.risk<40).length;
+    document.getElementById('alerts-count').innerText = total;
+    document.getElementById('alerts-high').innerText = high;
+    document.getElementById('alerts-med').innerText = med;
+    document.getElementById('alerts-low').innerText = low;
+  }
+
+  // Populate table
+  function renderTable(filterText=''){
+    const tbody = document.querySelector('#alertsTable tbody');
+    tbody.innerHTML = '';
+    ALERTS.filter(a=>{
+      if(!filterText) return true;
+      const s = filterText.toLowerCase();
+      return a.host.toLowerCase().includes(s) || a.event.toLowerCase().includes(s) || (a.mitre||'').toLowerCase().includes(s) || (a.details||'').toLowerCase().includes(s);
+    }).forEach(a=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${a.time}</td>
+        <td>${a.host}</td>
+        <td>${a.event}</td>
+        <td><span class="badge ${a.risk>=70?'bg-danger':a.risk>=40?'bg-warning text-dark':'bg-success'}">${a.risk}</span></td>
+        <td>${a.mitre||''}</td>
+        <td><button class="btn btn-sm btn-outline-primary btn-details">View</button></td>
+      `;
+      tr.querySelector('.btn-details').addEventListener('click',()=>alert(`${a.event}\n\nHost: ${a.host}\nTime: ${a.time}\nRisk: ${a.risk}\n\n${a.details}`));
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Charts
+  function renderCharts(){
+    const ctx = document.getElementById('alertsTimeline').getContext('2d');
+    const labels = ALERTS.map(a=>a.time).reverse();
+    const data = ALERTS.map(a=>a.risk).reverse();
+    new Chart(ctx, { type:'line', data:{ labels, datasets:[{label:'Alert Risk',data,fill:false, tension:0.3}] }, options:{plugins:{legend:{display:false}}} });
+
+    const ctx2 = document.getElementById('severityDonut').getContext('2d');
+    const high = ALERTS.filter(a=>a.risk>=70).length;
+    const med = ALERTS.filter(a=>a.risk>=40 && a.risk<70).length;
+    const low = ALERTS.filter(a=>a.risk<40).length;
+    new Chart(ctx2, { type:'doughnut', data:{ labels:['High','Medium','Low'], datasets:[{data:[high,med,low]}] }, options:{plugins:{legend:{position:'bottom'}}} });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    populateSummary();
+    renderTable();
+    renderCharts();
+
+    document.getElementById('searchAlert').addEventListener('input',(e)=>{
+      renderTable(e.target.value);
+    });
+  });
+  </script>
+  <script src="js/theme-loader.js"></script>
+  <script src="js/toggle.js"></script>
+
+</body>
+</html>
